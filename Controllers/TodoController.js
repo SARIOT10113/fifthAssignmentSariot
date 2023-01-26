@@ -2,8 +2,8 @@ const TodoModel =require('../Models/TodoModel');
 
 // CREATE TODO 
 const createTodo =async(req,res)=>{
-    let {title,description}=req.body;
-    if(!title || !description){
+    let {title,description,todoStatus}=req.body;
+    if(!title || !description ){
         res.status(400).json({status:"Please fill in the gaps"})
     }
     try {
@@ -11,6 +11,7 @@ const createTodo =async(req,res)=>{
             user:req.user.id,
             title,
             description,
+            todoStatus,
         })
         res.status(400).json(todoitem)
     } catch (error) {
@@ -56,9 +57,9 @@ const updateTodo =async(req,res)=>{
         let updataed = {
             title:title,
             description:description,
-            updatedAt:updatedAt
+            updatedAt:updatedAt,
         };
-        TodoModel.updateOne({_id:id},{$set:updataed},{$upset:true},(error,data)=>{
+        TodoModel.updateOne({id:id},{$set:updataed},{$upset:true},(error,data)=>{
             if(error){
                 res.status(401).json({status:"Todo update fail", data: error});
             }else{
@@ -86,11 +87,55 @@ const deleteTodo = async(req,res)=>{
     };
 };
 
+// UPDATE  USER TODO STATUS DATA
+const updateTodoStatus =async(req,res)=>{
+    try {
+        let todoStatus = req.body['todoStatus'];
+        let id = req.user._id;
+        let updatedAt = Date.now();
+        let updated = {
+            updatedAt,
+            todoStatus,
+        };
+        TodoModel.updateOne({id:id},{$set:updated},(error,data)=>{
+            if(error){
+                res.status(401).json({status:"fail", data: error});
+            }else{
+                res.status(200).json({status:"success", data: data});
+            };
+        })
+    } catch (error) {
+        console.log(error);
+    };
+};
+
+
+
+// TODO LIST FILTER STATUS
+const statusFilterByTodo =async(req,res)=>{
+    let id =req.user._id;
+    let todoStatus = req.params['todoStatus']
+    console.log(id)
+
+    try {
+    await TodoModel.find({id:id,todoStatus:todoStatus},(error,data)=>{
+        if(error){
+            res.status(401).json({status:"fail", data: error})
+        }else{
+            res.status(200).json({status:"success", data: data})
+        }
+    })
+    } catch (error) {
+        console.log(error)
+    }
+};
 
 module.exports ={
     createTodo,
     getTodoById,
     deleteTodo,
     updateTodo,
+    updateTodoStatus,
     getTodos,
+    statusFilterByTodo,
 }

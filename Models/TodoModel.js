@@ -8,14 +8,16 @@ const TodoSchema = mongoose.Schema({
     title:{
         type: String,
         required: true,
-        unique:true,
+        unique:[true,'title must be unique'],
     },
     description:{
         type: String,
         required: true,
     },
-    
-
+    todoStatus:{
+        type: String,
+        default: "new",
+    }
 },{timestamps: true,versionKey: false});
 
 const TodoModel = mongoose.model('todos',TodoSchema);
